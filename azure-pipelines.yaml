@@ -24,7 +24,7 @@ stages:
       inputs:
         secureFile: 'terraform.tfvars'
     - bash: |
-        $(Agent.TempDirectory)/terraform.tfvars $(System.DefaultWorkingDirectory)/terraform/environments/test
+        cp $(Agent.TempDirectory)/terraform.tfvars $(System.DefaultWorkingDirectory)/terraform/environments/test
       displayName: Copy terraform.tfvars to working directory
     - task: TerraformInstaller@0
       inputs:
