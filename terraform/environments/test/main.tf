@@ -7,10 +7,10 @@ provider "azurerm" {
 }
 terraform {
   backend "azurerm" {
-    storage_account_name = ""
-    container_name       = ""
-    key                  = ""
-    access_key           = ""
+    resource_group_name  = "tstate"
+    storage_account_name = "tstate19882"
+    container_name       = "tstate"
+    key                  = "terraform.tfstate"
   }
 }
 module "resource_group" {
@@ -30,12 +30,12 @@ module "network" {
 }
 
 module "nsg-test" {
-  source           = "../../modules/networksecuritygroup"
-  location         = "${var.location}"
-  application_type = "${var.application_type}"
-  resource_type    = "NSG"
-  resource_group   = "${module.resource_group.resource_group_name}"
-  subnet_id        = "${module.network.subnet_id_test}"
+  source              = "../../modules/networksecuritygroup"
+  location            = "${var.location}"
+  application_type    = "${var.application_type}"
+  resource_type       = "NSG"
+  resource_group      = "${module.resource_group.resource_group_name}"
+  subnet_id           = "${module.network.subnet_id_test}"
   address_prefix_test = "${var.address_prefix_test}"
 }
 module "appservice" {
@@ -51,4 +51,14 @@ module "publicip" {
   application_type = "${var.application_type}"
   resource_type    = "publicip"
   resource_group   = "${module.resource_group.resource_group_name}"
+}
+module "vm" {
+  source               = "../../modules/vm"
+  location             = "${var.location}"
+  application_type     = "${var.application_type}"
+  resource_type        = "vm"
+  resource_group       = "${module.resource_group.resource_group_name}"
+  subnet_id            = "${module.network.subnet_id_test}"
+  public_ip_address_id = "${module.publicip.public_ip_address_id}"
+  vm_adminuser    = "${var.vm_adminuser}"
 }
