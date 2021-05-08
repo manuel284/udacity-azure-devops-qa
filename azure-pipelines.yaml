@@ -76,6 +76,45 @@ stages:
               appName: 'toast-AppService'
               appType: webApp
               package: $(Pipeline.Workspace)/drop-fakerestapi/$(Build.BuildId)-fakerestapi.zip
+  
+- stage: Destroy_Terraform
+  jobs:
+  - job: Build
+    pool:
+      name: Hosted Ubuntu 1604
+    steps:
+    - task: DownloadSecureFile@1
+      name: tfvars
+      displayName: Download terraform.tfvars
+      inputs:
+        secureFile: 'terraform.tfvars'
+    - bash: |
+        cp $(Agent.TempDirectory)/terraform.tfvars $(System.DefaultWorkingDirectory)/terraform/environments/test
+      displayName: Copy terraform.tfvars to working directory
+    - task: TerraformInstaller@0
+      displayName: Install Terraform
+      inputs:
+        terraformVersion: '0.13.5'
+    - task: TerraformTaskV1@0
+      displayName: Terraform destroy
+      inputs:
+        provider: 'azurerm'
+        command: 'init'
+        workingDirectory: '$(System.DefaultWorkingDirectory)/terraform/environments/test'
+        commandOptions: '-reconfigure'
+        backendServiceArm: 'udacity-qa'
+        backendAzureRmResourceGroupName: 'tstate'
+        backendAzureRmStorageAccountName: 'tstate19882'
+        backendAzureRmContainerName: 'tstate'
+        backendAzureRmKey: 'terraform.tfstate'
+    - task: TerraformTaskV1@0
+      inputs:
+        provider: 'azurerm'
+        command: 'destroy'
+        workingDirectory: '$(System.DefaultWorkingDirectory)/terraform/environments/test'
+        commandOptions: '-auto-approve'
+        environmentServiceNameAzureRM: 'udacity-qa'
+
   # - deployment: VMDeploy
   #   displayName: NAME
   #   environment:
