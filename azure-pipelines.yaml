@@ -105,18 +105,18 @@ stages:
       inputs:
         terraformVersion: '0.13.5'
     - task: TerraformTaskV1@0
-      displayName: Terraform destroy
+      displayName: Terraform init
       inputs:
         provider: 'azurerm'
         command: 'init'
         workingDirectory: '$(System.DefaultWorkingDirectory)/terraform/environments/test'
-        commandOptions: '-reconfigure'
         backendServiceArm: 'udacity-qa'
         backendAzureRmResourceGroupName: 'tstate'
         backendAzureRmStorageAccountName: 'tstate19882'
         backendAzureRmContainerName: 'tstate'
         backendAzureRmKey: 'terraform.tfstate'
     - task: TerraformTaskV1@0
+      displayName: Terraform destroy
       inputs:
         provider: 'azurerm'
         command: 'destroy'
