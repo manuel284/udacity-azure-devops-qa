@@ -1,4 +1,8 @@
 name: Azure Pipelines
+trigger:
+  branches:
+    include:
+    - master
 variables:
   python.version: '3.7.6'
 stages:
