@@ -70,12 +70,15 @@ stages:
         deploy:
           steps:
           - task: AzureWebApp@1
-            displayName: 'Deploy Azure Web App'
             inputs:
               azureSubscription: 'udacity-qa'
+              appType: 'webApp'
               appName: 'toast-AppService'
-              appType: webApp
-              package: $(Pipeline.Workspace)/drop-fakerestapi/$(Build.BuildId)-fakerestapi.zip
+              deployToSlotOrASE: true
+              resourceGroupName: 'rg-udacity-qa'
+              slotName: 'production'
+              package: '$(Pipeline.Workspace)/drop-fakerestapi/$(Build.BuildId)-fakerestapi.zip'
+              deploymentMethod: 'zipDeploy'
   # - deployment: VMDeploy
   #   displayName: NAME
   #   environment:
