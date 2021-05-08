@@ -6,7 +6,7 @@ trigger:
 variables:
   python.version: '3.7.6'
 stages:
-- stage: Deploy Terraform
+- stage: Deploy_Terraform
   jobs:
   - job: Build
     pool:
