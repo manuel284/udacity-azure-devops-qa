@@ -6,18 +6,46 @@ trigger:
 variables:
   python.version: '3.7.6'
 stages:
-- stage: Build
+- stage: Deploy Terraform
   jobs:
   - job: Build
     pool:
       name: Hosted Ubuntu 1604
     steps:
     # Needed for Terraform VM deployment
-    # - task: InstallSSHKey@0
-    #   inputs:
-    #     knownHostsEntry: 'KNOWN_HOSTS_STRING'
-    #     sshPublicKey: 'PUBLIC_KEY'
-    #     sshKeySecureFile: 'id_rsa'
+    - task: InstallSSHKey@0
+      inputs:
+        knownHostsEntry: 'KNOWN_HOSTS_STRING'
+        sshPublicKey: 'PUBLIC_KEY'
+        sshKeySecureFile: 'id_rsa'
+    - task: DownloadSecureFile@1
+      name: tfvars
+      displayName: Download terraform.tfvars
+      inputs:
+        secureFile: 'terraform.tfvars'
+    - bash: |
+        $(Agent.TempDirectory)/terraform.tfvars $(System.DefaultWorkingDirectory)/terraform/environments/test
+      displayName: Copy terraform.tfvars to working directory
+    - task: TerraformInstaller@0
+      inputs:
+        terraformVersion: '0.15.1'
+    - task: TerraformTaskV1@0
+      inputs:
+        provider: 'azurerm'
+        command: 'init'
+        workingDirectory: '$(System.DefaultWorkingDirectory)/terraform/environments/test'
+        backendServiceArm: 'udacity-qa'
+        backendAzureRmResourceGroupName: 'tstate'
+        backendAzureRmStorageAccountName: 'tstate19882'
+        backendAzureRmContainerName: 'tstate'
+        backendAzureRmKey: 'terraform.tfstate'
+    - task: TerraformTaskV1@0
+      inputs:
+        provider: 'azurerm'
+        command: 'apply'
+        workingDirectory: '$(System.DefaultWorkingDirectory)/terraform/environments/test'
+        commandOptions: '-auto-approve'
+        environmentServiceNameAzureRM: 'udacity-qa'
     - task: ArchiveFiles@2
       displayName: 'Archive FakeRestAPI'
       inputs:
