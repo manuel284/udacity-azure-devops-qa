@@ -103,14 +103,14 @@ stages:
     - task: ArchiveFiles@2
       displayName: 'Archive StressTest'
       inputs:
-        rootFolderOrFile: '$(System.DefaultWorkingDirectory)log/jmeter/StressTestReport'
+        rootFolderOrFile: '$(System.DefaultWorkingDirectory)/log/jmeter/StressTestReport'
         includeRootFolder: false
         archiveType: 'zip'
         archiveFile: '$(System.DefaultWorkingDirectory)/log/jmeter/StressTestReport-$(Build.BuildId).zip'
     - task: ArchiveFiles@2
       displayName: 'Archive EnduranceTest'
       inputs:
-        rootFolderOrFile: '$(System.DefaultWorkingDirectory)log/jmeter/EnduranceTest'
+        rootFolderOrFile: '$(System.DefaultWorkingDirectory)/log/jmeter/EnduranceTest'
         includeRootFolder: false
         archiveType: 'zip'
         archiveFile: '$(System.DefaultWorkingDirectory)/log/jmeter/EnduranceTest-$(Build.BuildId).zip'
