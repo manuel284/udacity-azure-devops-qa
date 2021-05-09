@@ -121,4 +121,70 @@ https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/guides/ser
       "tenant": "****"
     }
     ```
-3. Create a log analytics workspace
+3. Create a Service Connection<br/>
+In the Project settings of your DevOps project, add a new service connection (Azure Resource Manager) called `udacity-qa`.
+4. Create environment with terraform<br/>
+Run the pipeline to create the resources.
+5. Add the VM to your environment<br/>
+Under Environments/TEST, add a new resource (VM-Linux).<br/>
+Copy the registration script, ssh into your vm and run the script.
+4. Create a log analytics workspace<br/>
+https://docs.microsoft.com/en-us/cli/azure/monitor/log-analytics/workspace?view=azure-cli-latest#az_monitor_log_analytics_workspace_create<br/>
+[create_log_analytics_workspace.sh](create_log_analytics_workspace.sh)<br/>
+    Sample output:<br/>
+    ```
+    $ . create_log_analytics_workspace.sh 
+    {
+      "id": "/subscriptions/****/resourceGroups/rg-log-analytics",
+      "location": "eastus",
+      "managedBy": null,
+      "name": "rg-log-analytics",
+      "properties": {
+        "provisioningState": "Succeeded"
+      },
+      "tags": null,
+      "type": "Microsoft.Resources/resourceGroups"
+    }
+    {
+      "customerId": "****",
+      "eTag": null,
+      "id": "/subscriptions/****/resourcegroups/rg-log-analytics/providers/microsoft.operationalinsights/workspaces/toast-log",
+      "location": "eastus",
+      "name": "toast-log",
+      "privateLinkScopedResources": null,
+      "provisioningState": "Succeeded",
+      "publicNetworkAccessForIngestion": "Enabled",
+      "publicNetworkAccessForQuery": "Enabled",
+      "resourceGroup": "rg-log-analytics",
+      "retentionInDays": 30,
+      "sku": {
+        "capacityReservationLevel": null,
+        "lastSkuUpdate": "Sun, 09 May 2021 08:13:06 GMT",
+        "maxCapacityReservationLevel": 3000,
+        "name": "pergb2018"
+      },
+      "tags": null,
+      "type": "Microsoft.OperationalInsights/workspaces",
+      "workspaceCapping": {
+        "dailyQuotaGb": -1.0,
+        "dataIngestionStatus": "RespectQuota",
+        "quotaNextResetTime": "Sun, 09 May 2021 21:00:00 GMT"
+      }
+    }
+
+    {
+      "primarySharedKey": "****",
+      "secondarySharedKey": "****"
+    }
+    ```
+    Get the customerId and primarySharedKey from the output.
+4. Install the log analytics agent on our vm<br/>
+https://docs.microsoft.com/en-us/azure/azure-monitor/agents/agent-linux#install-the-agent-using-wrapper-script<br/>
+Run below commands on your VM.<br/>
+Ensure that GDB is installed:
+```
+sudo apt-get update
+$ sudo apt-get install gdb
+```
+`wget https://raw.githubusercontent.com/Microsoft/OMS-Agent-for-Linux/master/installer/scripts/onboard_agent.sh && sh onboard_agent.sh -w <YOUR WORKSPACE ID> -s <YOUR WORKSPACE PRIMARY KEY> -d opinsights.azure.com`<br/>
+Replace `<YOUR WORKSPACE ID>` with the customerId and `<YOUR WORKSPACE PRIMARY KEY>` with the primarySharedKey from the previous step.

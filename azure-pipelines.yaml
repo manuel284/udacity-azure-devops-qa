@@ -26,29 +26,29 @@ stages:
     - bash: |
         cp $(Agent.TempDirectory)/terraform.tfvars $(System.DefaultWorkingDirectory)/terraform/environments/test
       displayName: Copy terraform.tfvars to working directory
-    - task: TerraformInstaller@0
-      displayName: Install Terraform
-      inputs:
-        terraformVersion: '0.13.5'
-    - task: TerraformTaskV1@0
-      displayName: Terraform init
-      inputs:
-        provider: 'azurerm'
-        command: 'init'
-        workingDirectory: '$(System.DefaultWorkingDirectory)/terraform/environments/test'
-        commandOptions: '-reconfigure'
-        backendServiceArm: 'udacity-qa'
-        backendAzureRmResourceGroupName: 'tstate'
-        backendAzureRmStorageAccountName: 'tstate19882'
-        backendAzureRmContainerName: 'tstate'
-        backendAzureRmKey: 'terraform.tfstate'
-    - task: TerraformTaskV1@0
-      inputs:
-        provider: 'azurerm'
-        command: 'apply'
-        workingDirectory: '$(System.DefaultWorkingDirectory)/terraform/environments/test'
-        commandOptions: '-auto-approve'
-        environmentServiceNameAzureRM: 'udacity-qa'
+    # - task: TerraformInstaller@0
+    #   displayName: Install Terraform
+    #   inputs:
+    #     terraformVersion: '0.13.5'
+    # - task: TerraformTaskV1@0
+    #   displayName: Terraform init
+    #   inputs:
+    #     provider: 'azurerm'
+    #     command: 'init'
+    #     workingDirectory: '$(System.DefaultWorkingDirectory)/terraform/environments/test'
+    #     commandOptions: '-reconfigure'
+    #     backendServiceArm: 'udacity-qa'
+    #     backendAzureRmResourceGroupName: 'tstate'
+    #     backendAzureRmStorageAccountName: 'tstate19882'
+    #     backendAzureRmContainerName: 'tstate'
+    #     backendAzureRmKey: 'terraform.tfstate'
+    # - task: TerraformTaskV1@0
+    #   inputs:
+    #     provider: 'azurerm'
+    #     command: 'apply'
+    #     workingDirectory: '$(System.DefaultWorkingDirectory)/terraform/environments/test'
+    #     commandOptions: '-auto-approve'
+    #     environmentServiceNameAzureRM: 'udacity-qa'
     - task: ArchiveFiles@2
       displayName: 'Archive FakeRestAPI'
       inputs:
@@ -59,28 +59,61 @@ stages:
     - publish: $(Build.ArtifactStagingDirectory)/$(Build.BuildId)-fakerestapi.zip
       displayName: 'Upload Package'
       artifact: drop-fakerestapi
-- stage:
+# - stage:
+#   jobs:
+#   - deployment: FakeRestAPI
+#     pool:
+#       vmImage: 'Ubuntu-16.04'
+#     environment: 'TEST'
+#     strategy:
+#       runOnce:
+#         deploy:
+#           steps:
+#           - task: AzureWebApp@1
+#             displayName: 'Deploy Azure Web App'
+#             inputs:
+#               azureSubscription: 'udacity-qa'
+#               appType: 'webApp'
+#               appName: 'toast-AppService'
+#               deployToSlotOrASE: true
+#               resourceGroupName: 'rg-udacity-qa'
+#               slotName: 'production'
+#               package: '$(Pipeline.Workspace)/drop-fakerestapi/$(Build.BuildId)-fakerestapi.zip'
+#               deploymentMethod: 'zipDeploy'
+- stage: Tests
   jobs:
-  - deployment: FakeRestAPI
+  - job: Postman
+    displayName: Agent job 1
     pool:
-      vmImage: 'Ubuntu-16.04'
-    environment: 'TEST'
-    strategy:
-      runOnce:
-        deploy:
-          steps:
-          - task: AzureWebApp@1
-            displayName: 'Deploy Azure Web App'
-            inputs:
-              azureSubscription: 'udacity-qa'
-              appType: 'webApp'
-              appName: 'toast-AppService'
-              deployToSlotOrASE: true
-              resourceGroupName: 'rg-udacity-qa'
-              slotName: 'production'
-              package: '$(Pipeline.Workspace)/drop-fakerestapi/$(Build.BuildId)-fakerestapi.zip'
-              deploymentMethod: 'zipDeploy'
-  
+      vmImage: vs2017-win2016
+    steps:
+    - checkout: self
+    - task: Npm@1
+      displayName: npm custom
+      inputs:
+        command: custom
+        verbose: false
+        customCommand: install -g newman
+    - task: CmdLine@2
+      displayName: Regression Tests
+      inputs:
+        script: newman run $(Build.SourcesDirectory)\automatedtesting\postman\Regression_Test_Suite.postman_collection.json -x -r junit --reporter-junit-export $(build.artifactstagingdirectory)\log\Postman\Regression_Test_Suite.xml
+    - task: CmdLine@2
+      displayName: Data Validation Tests
+      inputs:
+        script: newman run -e $(Build.SourcesDirectory)\automatedtesting\postman\QA.postman_environment.json $(Build.SourcesDirectory)\automatedtesting\postman\Data_Validation_Test_Suite.postman_collection.json -x -r junit --reporter-junit-export $(build.artifactstagingdirectory)\log\Postman\Data_Validation_Test_Suite.xml
+    - task: PublishPipelineArtifact@1
+      displayName: Publish Postman Logs
+      inputs:
+        targetPath: '$(System.DefaultWorkingDirectory)/log/postman'
+        artifactName: 'drop-postman-log'
+    - task: PublishTestResults@2
+      displayName: Publish Test Results
+      inputs:
+        testResultsFiles: '**\*.xml'
+        mergeTestResults: true
+        searchFolder: '$(System.DefaultWorkingDirectory)/log/postman'
+    
 # - stage: Destroy_Terraform
 #   jobs:
 #   - job: Build
