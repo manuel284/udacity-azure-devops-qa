@@ -110,7 +110,7 @@ stages:
     - task: ArchiveFiles@2
       displayName: 'Archive EnduranceTest'
       inputs:
-        rootFolderOrFile: '$(System.DefaultWorkingDirectory)/log/jmeter/EnduranceTest'
+        rootFolderOrFile: '$(System.DefaultWorkingDirectory)/log/jmeter/EnduranceTestReport'
         includeRootFolder: false
         archiveType: 'zip'
         archiveFile: '$(System.DefaultWorkingDirectory)/log/jmeter/EnduranceTest-$(Build.BuildId).zip'
