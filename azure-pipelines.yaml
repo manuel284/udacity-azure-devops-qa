@@ -94,9 +94,9 @@ stages:
 #               slotName: 'production'
 #               package: '$(Pipeline.Workspace)/drop-fakerestapi/$(Build.BuildId)-fakerestapi.zip'
 #               deploymentMethod: 'zipDeploy'
-- stage: Setup VM
+- stage: Setup_VM
   jobs:
-  - deployment: Prerequisites VM
+  - deployment: Prerequisites_VM
     environment:
       name: 'TEST'
       resourceType: VirtualMachine
@@ -120,7 +120,7 @@ stages:
 
 - stage: Tests
   jobs:
-  - deployment: Run Selenium Tests
+  - deployment: Run_Selenium_Tests
     environment:
       name: 'TEST'
       resourceType: VirtualMachine
