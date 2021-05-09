@@ -73,7 +73,7 @@ stages:
         targetPath: '$(Build.ArtifactStagingDirectory)/selenium-$(Build.BuildId).zip'
         artifactName: 'drop-selenium'
 
-- stage: Deploy FakeRestAPI
+- stage: Deploy_FakeRestAPI
   jobs:
   - deployment: FakeRestAPI
     pool:
