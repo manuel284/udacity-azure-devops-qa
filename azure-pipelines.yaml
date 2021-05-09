@@ -91,7 +91,7 @@ stages:
         sudo apt-get install openjdk-11-jre -y
         wget https://archive.apache.org/dist/jmeter/binaries/apache-jmeter-5.4.1.tgz -O jmeter.tgz
         tar xzvf jmeter.tgz
-        mkdir log/jmeter
+        mkdir -p log/jmeter
       displayName: JMeter Installation
     - bash: |
         apache-jmeter-5.4.1/bin/jmeter -n -t automatedtesting/jmeter/StressTest.jmx -l log/jmeter/StressTest.csv -e -f -o log/jmeter/StressTestReport -j log/jmeter/StressTest.log
