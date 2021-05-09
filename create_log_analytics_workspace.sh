@@ -1,5 +1,5 @@
 LOCATION="eastus"
-RG_NAME="rg-log-analytics"
+RG_NAME="rg-udacity-qa"
 LOG_NAME="toast-log"
 SKU="PerGB2018"
 
