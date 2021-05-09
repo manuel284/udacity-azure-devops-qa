@@ -112,7 +112,7 @@ stages:
               sudo apt-get install unzip -y
               sudo apt-get install -y chromium-browser
               sudo apt-get install -y chromium-chromedriver
-              sudo python3 -m pip install --upgrade pip
+              sudo curl -fsSL -o- https://bootstrap.pypa.io/pip/3.5/get-pip.py | python3.5
               sudo pip3 install selenium
             env:
               AZURE_LOG_ANALYTICS_ID: $(LOG_WORKSPACE_ID)
@@ -164,7 +164,7 @@ stages:
         rootFolderOrFile: '$(System.DefaultWorkingDirectory)/log/jmeter/EnduranceTestReport'
         includeRootFolder: false
         archiveType: 'zip'
-        archiveFile: '$(System.DefaultWorkingDirectory)/log/jmeter/EnduranceTest-$(Build.BuildId).zip'
+        archiveFile: '$(System.DefaultWorkingDirectory)/log/jmeter/EnduranceTestReport-$(Build.BuildId).zip'
     - publish: $(System.DefaultWorkingDirectory)/log/jmeter
       displayName: 'Upload Test Results'
       artifact: drop-jmeter-reports
