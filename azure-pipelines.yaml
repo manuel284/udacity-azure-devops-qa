@@ -114,7 +114,7 @@ stages:
         includeRootFolder: false
         archiveType: 'zip'
         archiveFile: '$(System.DefaultWorkingDirectory)/log/jmeter/EnduranceTest-$(Build.BuildId).zip'
-    - publish: $(Build.ArtifactStagingDirectory)/$(Build.BuildId)-fakerestapi.zip
+    - publish: $(Build.ArtifactStagingDirectory)/log/jmeter
       displayName: 'Upload Test Results'
       artifact: drop-jmeter-reports
 
