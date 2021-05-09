@@ -112,8 +112,8 @@ stages:
               sudo apt-get install unzip -y
               sudo apt-get install -y chromium-browser
               sudo apt-get install -y chromium-chromedriver
-              python3 -m pip install --upgrade pip
-              pip3 install selenium
+              sudo python3 -m pip install --upgrade pip
+              sudo pip3 install selenium
             env:
               AZURE_LOG_ANALYTICS_ID: $(LOG_WORKSPACE_ID)
               AZURE_LOG_ANALYTICS_PRIMARY_KEY: $(LOG_PRIMARY_KEY)
