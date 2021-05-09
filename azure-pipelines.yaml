@@ -88,7 +88,7 @@ stages:
       name: Hosted Ubuntu 1604
     steps:
     - bash: |
-        sudo apt-get install openjdk-11-jre -y
+        sudo apt-get install openjdk-11-jre-headless -y
         wget https://archive.apache.org/dist/jmeter/binaries/apache-jmeter-5.4.1.tgz -O jmeter.tgz
         tar xzvf jmeter.tgz
         mkdir -p log/jmeter
@@ -114,7 +114,7 @@ stages:
         includeRootFolder: false
         archiveType: 'zip'
         archiveFile: '$(System.DefaultWorkingDirectory)/log/jmeter/EnduranceTest-$(Build.BuildId).zip'
-    - publish: $(Build.ArtifactStagingDirectory)/log/jmeter
+    - publish: $(System.DefaultWorkingDirectory)/log/jmeter
       displayName: 'Upload Test Results'
       artifact: drop-jmeter-reports
 
