@@ -130,7 +130,7 @@ stages:
          steps:
           - bash: |
               cd $(Pipeline.Workspace)/drop-selenium
-              unzip -o selenium-$(Build.BuildId).zip
+              sudo unzip -o selenium-$(Build.BuildId).zip
               sudo mkdir -p /var/log/selenium
               sudo python3 login.py &> /var/log/selenium/login.log
   - job: JMeter
