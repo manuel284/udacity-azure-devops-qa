@@ -105,14 +105,14 @@ stages:
     - task: PublishPipelineArtifact@1
       displayName: Publish Postman Logs
       inputs:
-        targetPath: '$(System.DefaultWorkingDirectory)/log/postman'
+        targetPath: '$(build.artifactstagingdirectory)/log/postman'
         artifactName: 'drop-postman-log'
     - task: PublishTestResults@2
       displayName: Publish Test Results
       inputs:
         testResultsFiles: '**\*.xml'
         mergeTestResults: true
-        searchFolder: '$(System.DefaultWorkingDirectory)/log/postman'
+        searchFolder: '$(build.artifactstagingdirectory)/log/postman'
     
 # - stage: Destroy_Terraform
 #   jobs:
