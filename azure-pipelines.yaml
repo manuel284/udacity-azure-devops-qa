@@ -82,37 +82,73 @@ stages:
 #               deploymentMethod: 'zipDeploy'
 - stage: Tests
   jobs:
-  - job: Postman
-    displayName: Agent job 1
+  - job: JMeter
+    displayName: Jmeter Tests
     pool:
-      vmImage: vs2017-win2016
+      name: Hosted Ubuntu 1604
     steps:
-    - checkout: self
-    - task: Npm@1
-      displayName: npm custom
+    - bash: |
+        sudo apt-get install openjdk-11-jre -y
+        wget https://archive.apache.org/dist/jmeter/binaries/apache-jmeter-5.4.1.tgz -O jmeter.tgz
+        tar xzvf jmeter.tgz
+        mkdir log/jmeter
+      displayName: JMeter Installation
+    - bash: |
+        apache-jmeter-5.4.1/bin/jmeter -n -t automatedtesting/jmeter/StressTest.jmx -l log/jmeter/StressTest.csv -e -f -o log/jmeter/StressTestReport -j log/jmeter/StressTest.log
+      displayName: JMeter StressTest
+    - bash: |
+        apache-jmeter-5.4.1/bin/jmeter -n -t automatedtesting/jmeter/EnduranceTest.jmx -l log/jmeter/EnduranceTest.csv -e -f -o log/jmeter/EnduranceTestReport -j log/jmeter/EnduranceTest.log
+      displayName: JMeter EnduranceTest
+
+    - task: ArchiveFiles@2
+      displayName: 'Archive StressTest'
       inputs:
-        command: custom
-        verbose: false
-        customCommand: install -g newman
-    - task: CmdLine@2
-      displayName: Regression Tests
+        rootFolderOrFile: '$(System.DefaultWorkingDirectory)log/jmeter/StressTestReport'
+        includeRootFolder: false
+        archiveType: 'zip'
+        archiveFile: '$(System.DefaultWorkingDirectory)/log/jmeter/StressTestReport-$(Build.BuildId).zip'
+    - task: ArchiveFiles@2
+      displayName: 'Archive EnduranceTest'
       inputs:
-        script: newman run $(Build.SourcesDirectory)\automatedtesting\postman\Regression_Test_Suite.postman_collection.json -x -r junit --reporter-junit-export $(build.artifactstagingdirectory)\log\Postman\Regression_Test_Suite.xml
-    - task: CmdLine@2
-      displayName: Data Validation Tests
-      inputs:
-        script: newman run -e $(Build.SourcesDirectory)\automatedtesting\postman\QA.postman_environment.json $(Build.SourcesDirectory)\automatedtesting\postman\Data_Validation_Test_Suite.postman_collection.json -x -r junit --reporter-junit-export $(build.artifactstagingdirectory)\log\Postman\Data_Validation_Test_Suite.xml
-    - task: PublishPipelineArtifact@1
-      displayName: Publish Postman Logs
-      inputs:
-        targetPath: '$(build.artifactstagingdirectory)/log/postman'
-        artifactName: 'drop-postman-log'
-    - task: PublishTestResults@2
-      displayName: Publish Test Results
-      inputs:
-        testResultsFiles: '**\*.xml'
-        mergeTestResults: true
-        searchFolder: '$(build.artifactstagingdirectory)/log/postman'
+        rootFolderOrFile: '$(System.DefaultWorkingDirectory)log/jmeter/EnduranceTest'
+        includeRootFolder: false
+        archiveType: 'zip'
+        archiveFile: '$(System.DefaultWorkingDirectory)/log/jmeter/EnduranceTest-$(Build.BuildId).zip'
+    - publish: $(Build.ArtifactStagingDirectory)/$(Build.BuildId)-fakerestapi.zip
+      displayName: 'Upload Test Results'
+      artifact: drop-jmeter-reports
+
+  # - job: Postman
+  #   displayName: Agent job 1
+  #   pool:
+  #     vmImage: vs2017-win2016
+  #   steps:
+  #   - checkout: self
+  #   - task: Npm@1
+  #     displayName: npm custom
+  #     inputs:
+  #       command: custom
+  #       verbose: false
+  #       customCommand: install -g newman
+  #   - task: CmdLine@2
+  #     displayName: Regression Tests
+  #     inputs:
+  #       script: newman run $(Build.SourcesDirectory)\automatedtesting\postman\Regression_Test_Suite.postman_collection.json -x -r junit --reporter-junit-export $(build.artifactstagingdirectory)\log\Postman\Regression_Test_Suite.xml
+  #   - task: CmdLine@2
+  #     displayName: Data Validation Tests
+  #     inputs:
+  #       script: newman run -e $(Build.SourcesDirectory)\automatedtesting\postman\QA.postman_environment.json $(Build.SourcesDirectory)\automatedtesting\postman\Data_Validation_Test_Suite.postman_collection.json -x -r junit --reporter-junit-export $(build.artifactstagingdirectory)\log\Postman\Data_Validation_Test_Suite.xml
+  #   - task: PublishPipelineArtifact@1
+  #     displayName: Publish Postman Logs
+  #     inputs:
+  #       targetPath: '$(build.artifactstagingdirectory)/log/postman'
+  #       artifactName: 'drop-postman-log'
+  #   - task: PublishTestResults@2
+  #     displayName: Publish Test Results
+  #     inputs:
+  #       testResultsFiles: '**\*.xml'
+  #       mergeTestResults: true
+  #       searchFolder: '$(build.artifactstagingdirectory)/log/postman'
     
 # - stage: Destroy_Terraform
 #   jobs:
