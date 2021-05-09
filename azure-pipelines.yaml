@@ -6,174 +6,175 @@ trigger:
 variables:
   python.version: '3.7.6'
 stages:
-- stage: Deploy_Terraform
-  jobs:
-  - job: Build
-    pool:
-      name: Hosted Ubuntu 1604
-    steps:
-    # Needed for Terraform VM deployment
-    - task: InstallSSHKey@0
-      inputs:
-        knownHostsEntry: '$(KNOWN_HOSTS)'
-        sshPublicKey: '$(PUBLIC_KEY)'
-        sshKeySecureFile: 'id_rsa'
-    - task: DownloadSecureFile@1
-      name: tfvars
-      displayName: Download terraform.tfvars
-      inputs:
-        secureFile: 'terraform.tfvars'
-    - bash: |
-        cp $(Agent.TempDirectory)/terraform.tfvars $(System.DefaultWorkingDirectory)/terraform/environments/test
-      displayName: Copy terraform.tfvars to working directory
-    - task: TerraformInstaller@0
-      displayName: Install Terraform
-      inputs:
-        terraformVersion: '0.13.5'
-    - task: TerraformTaskV1@0
-      displayName: Terraform init
-      inputs:
-        provider: 'azurerm'
-        command: 'init'
-        workingDirectory: '$(System.DefaultWorkingDirectory)/terraform/environments/test'
-        commandOptions: '-reconfigure'
-        backendServiceArm: 'udacity-qa'
-        backendAzureRmResourceGroupName: 'tstate'
-        backendAzureRmStorageAccountName: 'tstate19882'
-        backendAzureRmContainerName: 'tstate'
-        backendAzureRmKey: 'terraform.tfstate'
-    - task: TerraformTaskV1@0
-      inputs:
-        provider: 'azurerm'
-        command: 'apply'
-        workingDirectory: '$(System.DefaultWorkingDirectory)/terraform/environments/test'
-        commandOptions: '-auto-approve'
-        environmentServiceNameAzureRM: 'udacity-qa'
-    - task: ArchiveFiles@2
-      displayName: 'Archive FakeRestAPI'
-      inputs:
-        rootFolderOrFile: '$(System.DefaultWorkingDirectory)/automatedtesting/jmeter/fakerestapi'
-        includeRootFolder: false
-        archiveType: 'zip'
-        archiveFile: '$(Build.ArtifactStagingDirectory)/fakerestapi-$(Build.BuildId).zip'
-    - publish: $(Build.ArtifactStagingDirectory)/fakerestapi-$(Build.BuildId).zip
-      displayName: 'Upload Package'
-      artifact: drop-fakerestapi
+# - stage: Deploy_Terraform
+#   jobs:
+#   - job: Build
+#     pool:
+#       name: Hosted Ubuntu 1604
+#     steps:
+#     # Needed for Terraform VM deployment
+#     - task: InstallSSHKey@0
+#       inputs:
+#         knownHostsEntry: '$(KNOWN_HOSTS)'
+#         sshPublicKey: '$(PUBLIC_KEY)'
+#         sshKeySecureFile: 'id_rsa'
+#     - task: DownloadSecureFile@1
+#       name: tfvars
+#       displayName: Download terraform.tfvars
+#       inputs:
+#         secureFile: 'terraform.tfvars'
+#     - bash: |
+#         cp $(Agent.TempDirectory)/terraform.tfvars $(System.DefaultWorkingDirectory)/terraform/environments/test
+#       displayName: Copy terraform.tfvars to working directory
+#     - task: TerraformInstaller@0
+#       displayName: Install Terraform
+#       inputs:
+#         terraformVersion: '0.13.5'
+#     - task: TerraformTaskV1@0
+#       displayName: Terraform init
+#       inputs:
+#         provider: 'azurerm'
+#         command: 'init'
+#         workingDirectory: '$(System.DefaultWorkingDirectory)/terraform/environments/test'
+#         commandOptions: '-reconfigure'
+#         backendServiceArm: 'udacity-qa'
+#         backendAzureRmResourceGroupName: 'tstate'
+#         backendAzureRmStorageAccountName: 'tstate19882'
+#         backendAzureRmContainerName: 'tstate'
+#         backendAzureRmKey: 'terraform.tfstate'
+#     - task: TerraformTaskV1@0
+#       inputs:
+#         provider: 'azurerm'
+#         command: 'apply'
+#         workingDirectory: '$(System.DefaultWorkingDirectory)/terraform/environments/test'
+#         commandOptions: '-auto-approve'
+#         environmentServiceNameAzureRM: 'udacity-qa'
+#     - task: ArchiveFiles@2
+#       displayName: 'Archive FakeRestAPI'
+#       inputs:
+#         rootFolderOrFile: '$(System.DefaultWorkingDirectory)/automatedtesting/jmeter/fakerestapi'
+#         includeRootFolder: false
+#         archiveType: 'zip'
+#         archiveFile: '$(Build.ArtifactStagingDirectory)/fakerestapi-$(Build.BuildId).zip'
+#     - publish: $(Build.ArtifactStagingDirectory)/fakerestapi-$(Build.BuildId).zip
+#       displayName: 'Upload Package'
+#       artifact: drop-fakerestapi
 
-    - task: ArchiveFiles@2
-      displayName: Archive Selenium
-      inputs:
-        rootFolderOrFile: '$(System.DefaultWorkingDirectory)/automatedtesting/selenium'
-        includeRootFolder: false
-        archiveType: 'zip'
-        archiveFile: '$(Build.ArtifactStagingDirectory)/selenium-$(Build.BuildId).zip'
-    - task: PublishPipelineArtifact@1
-      displayName: Publish Selenium
-      inputs:
-        targetPath: '$(Build.ArtifactStagingDirectory)/selenium-$(Build.BuildId).zip'
-        artifactName: 'drop-selenium'
+#     - task: ArchiveFiles@2
+#       displayName: Archive Selenium
+#       inputs:
+#         rootFolderOrFile: '$(System.DefaultWorkingDirectory)/automatedtesting/selenium'
+#         includeRootFolder: false
+#         archiveType: 'zip'
+#         archiveFile: '$(Build.ArtifactStagingDirectory)/selenium-$(Build.BuildId).zip'
+#     - task: PublishPipelineArtifact@1
+#       displayName: Publish Selenium
+#       inputs:
+#         targetPath: '$(Build.ArtifactStagingDirectory)/selenium-$(Build.BuildId).zip'
+#         artifactName: 'drop-selenium'
 
-- stage: Deploy_FakeRestAPI
-  jobs:
-  - deployment: FakeRestAPI
-    pool:
-      vmImage: 'Ubuntu-16.04'
-    environment: 'TEST'
-    strategy:
-      runOnce:
-        deploy:
-          steps:
-          - task: AzureWebApp@1
-            displayName: 'Deploy Azure Web App'
-            inputs:
-              azureSubscription: 'udacity-qa'
-              appType: 'webApp'
-              appName: 'toast-AppService'
-              deployToSlotOrASE: true
-              resourceGroupName: 'rg-udacity-qa'
-              slotName: 'production'
-              package: '$(Pipeline.Workspace)/drop-fakerestapi/fakerestapi-$(Build.BuildId).zip'
-              deploymentMethod: 'zipDeploy'
-- stage: Setup_VM
-  jobs:
-  - deployment: Prerequisites_VM
-    environment:
-      name: 'TEST'
-      resourceType: VirtualMachine
-    strategy:
-     runOnce:
-       deploy:
-         steps:
-          - bash: |
-              sudo apt-get update -y
-              sudo apt-get install software-properties-common -y
-              sudo apt-add-repository universe -y
-              sudo apt-get install python3-pip -y
-              sudo apt-get install unzip -y
-              sudo apt-get install -y chromium-browser
-              sudo apt-get install -y chromium-chromedriver
-              sudo curl -fsSL -o- https://bootstrap.pypa.io/pip/3.5/get-pip.py | python3.5
-              sudo pip3 install selenium
+# - stage: Deploy_FakeRestAPI
+#   jobs:
+#   - deployment: FakeRestAPI
+#     pool:
+#       vmImage: 'Ubuntu-16.04'
+#     environment: 'TEST'
+#     strategy:
+#       runOnce:
+#         deploy:
+#           steps:
+#           - task: AzureWebApp@1
+#             displayName: 'Deploy Azure Web App'
+#             inputs:
+#               azureSubscription: 'udacity-qa'
+#               appType: 'webApp'
+#               appName: 'toast-AppService'
+#               deployToSlotOrASE: true
+#               resourceGroupName: 'rg-udacity-qa'
+#               slotName: 'production'
+#               package: '$(Pipeline.Workspace)/drop-fakerestapi/fakerestapi-$(Build.BuildId).zip'
+#               deploymentMethod: 'zipDeploy'
+# - stage: Setup_VM
+#   jobs:
+#   - deployment: Prerequisites_VM
+#     environment:
+#       name: 'TEST'
+#       resourceType: VirtualMachine
+#     strategy:
+#      runOnce:
+#        deploy:
+#          steps:
+#           - bash: |
+#               sudo apt-get update -y
+#               sudo apt-get install software-properties-common -y
+#               sudo apt-add-repository universe -y
+#               sudo apt-get install python3-pip -y
+#               sudo apt-get install gdb -y
+#               sudo apt-get install unzip -y
+#               sudo apt-get install -y chromium-browser
+#               sudo apt-get install -y chromium-chromedriver
+#               sudo curl -fsSL -o- https://bootstrap.pypa.io/pip/3.5/get-pip.py | python3.5
+#               sudo pip3 install selenium
 
 
-- stage: Tests
-  jobs:
-  - deployment: Run_Selenium_Tests
-    environment:
-      name: 'TEST'
-      resourceType: VirtualMachine
-    strategy:
-     runOnce:
-       deploy:
-         steps:
-          - bash: |
-              cd $(Pipeline.Workspace)/drop-selenium
-              echo "test"
-              pwd
-              sudo pwd
-              echo "test2"
-              sudo mkdir -p /var/log/selenium
-              sudo chmod 666 /var/log/selenium
-              sudo unzip -o selenium-$(Build.BuildId).zip
-              sudo mkdir -p /var/log/selenium
-              sudo python3 login.py | sudo tee -a /var/log/selenium/login.log
-              mkdir -p log/selenium
-              sudo cp /var/log/selenium/login.log log/selenium/login.log
-  - job: JMeter
-    displayName: Jmeter Tests
-    pool:
-      name: Hosted Ubuntu 1604
-    steps:
-    - bash: |
-        sudo apt-get install openjdk-11-jre-headless -y
-        wget https://archive.apache.org/dist/jmeter/binaries/apache-jmeter-5.4.1.tgz -O jmeter.tgz
-        tar xzvf jmeter.tgz
-        mkdir -p log/jmeter
-      displayName: JMeter Installation
-    - bash: |
-        apache-jmeter-5.4.1/bin/jmeter -n -t automatedtesting/jmeter/StressTest.jmx -l log/jmeter/StressTest.csv -e -f -o log/jmeter/StressTestReport -j log/jmeter/StressTest.log
-      displayName: JMeter StressTest
-    - bash: |
-        apache-jmeter-5.4.1/bin/jmeter -n -t automatedtesting/jmeter/EnduranceTest.jmx -l log/jmeter/EnduranceTest.csv -e -f -o log/jmeter/EnduranceTestReport -j log/jmeter/EnduranceTest.log
-      displayName: JMeter EnduranceTest
+# - stage: Tests
+#   jobs:
+#   - deployment: Run_Selenium_Tests
+#     environment:
+#       name: 'TEST'
+#       resourceType: VirtualMachine
+#     strategy:
+#      runOnce:
+#        deploy:
+#          steps:
+#           - bash: |
+#               cd $(Pipeline.Workspace)/drop-selenium
+#               echo "test"
+#               pwd
+#               sudo pwd
+#               echo "test2"
+#               sudo mkdir -p /var/log/selenium
+#               sudo chmod 755 -R /var/log/selenium
+#               sudo unzip -o selenium-$(Build.BuildId).zip
+#               sudo mkdir -p /var/log/selenium
+#               sudo python3 login.py | sudo tee -a /var/log/selenium/login.log
+#               mkdir -p log/selenium
+#               sudo cp /var/log/selenium/login.log log/selenium/login.log
+#   - job: JMeter
+#     displayName: Jmeter Tests
+#     pool:
+#       name: Hosted Ubuntu 1604
+#     steps:
+#     - bash: |
+#         sudo apt-get install openjdk-11-jre-headless -y
+#         wget https://archive.apache.org/dist/jmeter/binaries/apache-jmeter-5.4.1.tgz -O jmeter.tgz
+#         tar xzvf jmeter.tgz
+#         mkdir -p log/jmeter
+#       displayName: JMeter Installation
+#     - bash: |
+#         apache-jmeter-5.4.1/bin/jmeter -n -t automatedtesting/jmeter/StressTest.jmx -l log/jmeter/StressTest.csv -e -f -o log/jmeter/StressTestReport -j log/jmeter/StressTest.log
+#       displayName: JMeter StressTest
+#     - bash: |
+#         apache-jmeter-5.4.1/bin/jmeter -n -t automatedtesting/jmeter/EnduranceTest.jmx -l log/jmeter/EnduranceTest.csv -e -f -o log/jmeter/EnduranceTestReport -j log/jmeter/EnduranceTest.log
+#       displayName: JMeter EnduranceTest
 
-    - task: ArchiveFiles@2
-      displayName: 'Archive StressTest'
-      inputs:
-        rootFolderOrFile: '$(System.DefaultWorkingDirectory)/log/jmeter/StressTestReport'
-        includeRootFolder: false
-        archiveType: 'zip'
-        archiveFile: '$(System.DefaultWorkingDirectory)/log/jmeter/StressTestReport-$(Build.BuildId).zip'
-    - task: ArchiveFiles@2
-      displayName: 'Archive EnduranceTest'
-      inputs:
-        rootFolderOrFile: '$(System.DefaultWorkingDirectory)/log/jmeter/EnduranceTestReport'
-        includeRootFolder: false
-        archiveType: 'zip'
-        archiveFile: '$(System.DefaultWorkingDirectory)/log/jmeter/EnduranceTestReport-$(Build.BuildId).zip'
-    - publish: $(System.DefaultWorkingDirectory)/log/jmeter
-      displayName: 'Upload Test Results'
-      artifact: drop-jmeter-reports
+#     - task: ArchiveFiles@2
+#       displayName: 'Archive StressTest'
+#       inputs:
+#         rootFolderOrFile: '$(System.DefaultWorkingDirectory)/log/jmeter/StressTestReport'
+#         includeRootFolder: false
+#         archiveType: 'zip'
+#         archiveFile: '$(System.DefaultWorkingDirectory)/log/jmeter/StressTestReport-$(Build.BuildId).zip'
+#     - task: ArchiveFiles@2
+#       displayName: 'Archive EnduranceTest'
+#       inputs:
+#         rootFolderOrFile: '$(System.DefaultWorkingDirectory)/log/jmeter/EnduranceTestReport'
+#         includeRootFolder: false
+#         archiveType: 'zip'
+#         archiveFile: '$(System.DefaultWorkingDirectory)/log/jmeter/EnduranceTestReport-$(Build.BuildId).zip'
+#     - publish: $(System.DefaultWorkingDirectory)/log/jmeter
+#       displayName: 'Upload Test Results'
+#       artifact: drop-jmeter-reports
 
   # - job: Postman
   #   displayName: Agent job 1
@@ -206,7 +207,8 @@ stages:
   #       testResultsFiles: '**\*.xml'
   #       mergeTestResults: true
   #       searchFolder: '$(build.artifactstagingdirectory)/log/postman'
-    
+
+# uncomment after project completion
 - stage: Destroy_Terraform
   jobs:
   - job: Build
