@@ -12,3 +12,8 @@ az monitor log-analytics workspace create \
   -n $LOG_NAME \
   -l $LOCATION \
   --sku $SKU
+
+
+az monitor log-analytics workspace get-shared-keys \
+  --resource-group $RG_NAME \
+  --workspace-name $LOG_NAME
