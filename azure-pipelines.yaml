@@ -49,6 +49,13 @@ stages:
         workingDirectory: '$(System.DefaultWorkingDirectory)/terraform/environments/test'
         commandOptions: '-auto-approve'
         environmentServiceNameAzureRM: 'udacity-qa'
+
+- stage: Get_Artifacts
+  jobs:
+  - job: Build
+    pool:
+      name: Hosted Ubuntu 1604
+    steps:
     - task: ArchiveFiles@2
       displayName: 'Archive FakeRestAPI'
       inputs:
@@ -73,7 +80,8 @@ stages:
         targetPath: '$(Build.ArtifactStagingDirectory)/selenium-$(Build.BuildId).zip'
         artifactName: 'drop-selenium'
 
-- stage: Deploy_FakeRestAPI
+
+- stage: Deployment
   jobs:
   - deployment: FakeRestAPI
     pool:
@@ -94,9 +102,7 @@ stages:
               slotName: 'production'
               package: '$(Pipeline.Workspace)/drop-fakerestapi/fakerestapi-$(Build.BuildId).zip'
               deploymentMethod: 'zipDeploy'
-- stage: Setup_VM
-  jobs:
-  - deployment: Prerequisites_VM
+  - deployment: VM
     environment:
       name: 'TEST'
       resourceType: VirtualMachine
@@ -113,13 +119,14 @@ stages:
               sudo apt-get install unzip -y
               sudo apt-get install -y chromium-browser
               sudo apt-get install -y chromium-chromedriver
-              sudo curl -fsSL -o- https://bootstrap.pypa.io/pip/3.5/get-pip.py | python3.5
+              pip3 install --upgrade pip
               sudo pip3 install selenium
 
 
 - stage: Tests
   jobs:
-  - deployment: Run_Selenium_Tests
+  - deployment: Selenium_Tests
+    displayName: Selenium Tests
     environment:
       name: 'TEST'
       resourceType: VirtualMachine
@@ -136,10 +143,9 @@ stages:
               sudo mkdir -p /var/log/selenium
               sudo chmod 755 -R /var/log/selenium
               sudo unzip -o selenium-$(Build.BuildId).zip
-              sudo mkdir -p /var/log/selenium
               sudo python3 login.py | sudo tee -a /var/log/selenium/login.log
               mkdir -p log/selenium
-              sudo cp /var/log/selenium/login.log log/selenium/login.log
+              sudo touch /var/log/selenium/selenium.log
   - job: JMeter
     displayName: Jmeter Tests
     pool:
@@ -176,37 +182,37 @@ stages:
       displayName: 'Upload Test Results'
       artifact: drop-jmeter-reports
 
-  # - job: Postman
-  #   displayName: Agent job 1
-  #   pool:
-  #     vmImage: vs2017-win2016
-  #   steps:
-  #   - checkout: self
-  #   - task: Npm@1
-  #     displayName: npm custom
-  #     inputs:
-  #       command: custom
-  #       verbose: false
-  #       customCommand: install -g newman
-  #   - task: CmdLine@2
-  #     displayName: Regression Tests
-  #     inputs:
-  #       script: newman run $(Build.SourcesDirectory)\automatedtesting\postman\Regression_Test_Suite.postman_collection.json -x -r junit --reporter-junit-export $(build.artifactstagingdirectory)\log\Postman\Regression_Test_Suite.xml
-  #   - task: CmdLine@2
-  #     displayName: Data Validation Tests
-  #     inputs:
-  #       script: newman run -e $(Build.SourcesDirectory)\automatedtesting\postman\QA.postman_environment.json $(Build.SourcesDirectory)\automatedtesting\postman\Data_Validation_Test_Suite.postman_collection.json -x -r junit --reporter-junit-export $(build.artifactstagingdirectory)\log\Postman\Data_Validation_Test_Suite.xml
-  #   - task: PublishPipelineArtifact@1
-  #     displayName: Publish Postman Logs
-  #     inputs:
-  #       targetPath: '$(build.artifactstagingdirectory)/log/postman'
-  #       artifactName: 'drop-postman-log'
-  #   - task: PublishTestResults@2
-  #     displayName: Publish Test Results
-  #     inputs:
-  #       testResultsFiles: '**\*.xml'
-  #       mergeTestResults: true
-  #       searchFolder: '$(build.artifactstagingdirectory)/log/postman'
+  - job: Postman
+    displayName: Agent job 1
+    pool:
+      vmImage: vs2017-win2016
+    steps:
+    - checkout: self
+    - task: Npm@1
+      displayName: npm custom
+      inputs:
+        command: custom
+        verbose: false
+        customCommand: install -g newman
+    - task: CmdLine@2
+      displayName: Regression Tests
+      inputs:
+        script: newman run $(Build.SourcesDirectory)\automatedtesting\postman\Regression_Test_Suite.postman_collection.json -x -r junit --reporter-junit-export $(build.artifactstagingdirectory)\log\Postman\Regression_Test_Suite.xml
+    - task: CmdLine@2
+      displayName: Data Validation Tests
+      inputs:
+        script: newman run -e $(Build.SourcesDirectory)\automatedtesting\postman\QA.postman_environment.json $(Build.SourcesDirectory)\automatedtesting\postman\Data_Validation_Test_Suite.postman_collection.json -x -r junit --reporter-junit-export $(build.artifactstagingdirectory)\log\Postman\Data_Validation_Test_Suite.xml
+    - task: PublishPipelineArtifact@1
+      displayName: Publish Postman Logs
+      inputs:
+        targetPath: '$(build.artifactstagingdirectory)/log/postman'
+        artifactName: 'drop-postman-log'
+    - task: PublishTestResults@2
+      displayName: Publish Test Results
+      inputs:
+        testResultsFiles: '**\*.xml'
+        mergeTestResults: true
+        searchFolder: '$(build.artifactstagingdirectory)/log/postman'
 
  ## uncomment after project completion
 # - stage: Destroy_Terraform
@@ -251,28 +257,3 @@ stages:
 #         workingDirectory: '$(System.DefaultWorkingDirectory)/terraform/environments/test'
 #         commandOptions: '-auto-approve'
 #         environmentServiceNameAzureRM: 'udacity-qa'
-
-  # - deployment: VMDeploy
-  #   displayName: NAME
-  #   environment:
-  #     name:  ENVIRONMENT NAME
-  #     resourceType: VirtualMachine
-  #     tags: TAG NAME
-  #   strategy:
-  #     runOnce:
-  #       deploy:
-  #         steps:
-  #         - task: Bash@3
-  #           inputs:
-  #             targetType: 'inline'
-  #             script: |
-  #               #! /bin/bash
-                
-  #               sudo apt-get upgrade -y
-  #               sudo apt-get install python3-pip -y
-  #               sudo apt-get install unzip -y
-  #               sudo apt-get install -y chromium-browser
-  #               pip3 install selenium
-  #               export PATH=$PATH:some/path
-
-

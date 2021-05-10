@@ -9,13 +9,14 @@ def dateTimeNow():
 
 # Start the browser and login with standard_user
 def login (user, password):
-    print ('Starting the browser...')
+    print('{:s}: Starting the browser...'.format(dateTimeNow()))
+    print ('')
     options = ChromeOptions()
     options.add_argument('--no-sandbox')
     options.add_argument('--headless')
     # options.add_argument('--disable-dev-shm-usage')
     driver = webdriver.Chrome(options=options)
-    print ('Browser started successfully. Navigating to the demo page to login.')
+    print('{:s}: Browser started successfully. Navigating to the demo page to login.'.format(dateTimeNow()))
     driver.get('https://www.saucedemo.com/')
     driver.find_element_by_css_selector("input[id='user-name']").send_keys(user)
     driver.find_element_by_css_selector("input[id='password']").send_keys(password)
