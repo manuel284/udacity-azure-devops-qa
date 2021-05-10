@@ -183,7 +183,7 @@ stages:
       artifact: drop-jmeter-reports
 
   - job: Postman
-    displayName: Agent job 1
+    displayName: Postman Tests
     pool:
       vmImage: vs2017-win2016
     steps:
