@@ -12,11 +12,11 @@
 					"listen": "test",
 					"script": {
 						"exec": [
-							"pm.test(\"Successful response\", function () {",
+							"pm.test(\"Data Validation - POST - Successful response\", function () {",
 							"    pm.expect(pm.response.text()).to.include(\"success\");",
 							"});",
 							"",
-							"pm.test(\"User created\", function () {",
+							"pm.test(\"Data Validation - POST - User created\", function () {",
 							"    pm.expect(pm.response.text()).to.include(\"Successfully! Record has been added.\");",
 							"});",
 							"",
@@ -63,25 +63,25 @@
 					"listen": "test",
 					"script": {
 						"exec": [
-							"pm.test(\"Successful response\", function () {",
+							"pm.test(\"Data Validation - GET - Successful response\", function () {",
 							"    pm.expect(pm.response.text()).to.include(\"success\");",
 							"});",
 							"",
-							"pm.test(\"User found\", function () {",
+							"pm.test(\"Data Validation - GET - User found\", function () {",
 							"    pm.expect(pm.response.text()).to.include(\"Successfully! Record has been fetched.\");",
 							"});",
 							"",
 							"var json = pm.response.json();",
 							"",
-							"pm.test(\"Employee is Tiger Nixon\", function() {",
+							"pm.test(\"Data Validation - GET - Employee is Tiger Nixon\", function() {",
 							"    pm.expect(json.data.employee_name).to.eql(\"Tiger Nixon\")",
 							"});",
 							"",
-							"pm.test(\"Salary is 320800\", function() {",
+							"pm.test(\"Data Validation - GET - Salary is 320800\", function() {",
 							"    pm.expect(json.data.employee_salary).to.eql(320800)",
 							"});",
 							"",
-							"pm.test(\"Age is 61\", function() {",
+							"pm.test(\"Data Validation - GET - Age is 61\", function() {",
 							"    pm.expect(json.data.employee_age).to.eql(61)",
 							"});",
 							""
@@ -118,11 +118,11 @@
 					"listen": "test",
 					"script": {
 						"exec": [
-							"pm.test(\"Successful response\", function () {",
+							"pm.test(\"Data Validation - PUT - Successful response\", function () {",
 							"    pm.expect(pm.response.text()).to.include(\"success\");",
 							"});",
 							"",
-							"pm.test(\"User updated\", function () {",
+							"pm.test(\"Data Validation - PUT - User updated\", function () {",
 							"    pm.expect(pm.response.text()).to.include(\"Successfully! Record has been updated.\");",
 							"});",
 							"",
@@ -169,12 +169,12 @@
 					"listen": "test",
 					"script": {
 						"exec": [
-							"pm.test(\"Successful response\", function () {",
+							"pm.test(\"Data Validation - DELETE - Successful response\", function () {",
 							"    pm.expect(pm.response.text()).to.include(\"success\");",
 							"});",
 							"",
-							"pm.test(\"User deleted\", function () {",
-							"    pm.expect(pm.response.text()).to.include(\"Successfully! Record has been deleted.\");",
+							"pm.test(\"Data Validation - DELETE - User deleted\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"Successfully! Record has been deleted\");",
 							"});"
 						],
 						"type": "text/javascript"
