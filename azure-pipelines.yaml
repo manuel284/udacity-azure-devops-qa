@@ -14,6 +14,7 @@ stages:
     steps:
     # Needed for Terraform VM deployment
     - task: InstallSSHKey@0
+      displayName: Install SSH Key
       inputs:
         knownHostsEntry: '$(KNOWN_HOSTS)'
         sshPublicKey: '$(PUBLIC_KEY)'
@@ -43,6 +44,7 @@ stages:
         backendAzureRmContainerName: 'tstate'
         backendAzureRmKey: 'terraform.tfstate'
     - task: TerraformTaskV1@0
+    displayName: Terraform apply
       inputs:
         provider: 'azurerm'
         command: 'apply'
@@ -121,7 +123,7 @@ stages:
               sudo apt-get install -y chromium-chromedriver
               pip3 install --upgrade pip
               sudo pip3 install selenium
-
+            displayName: Install tools
 
 - stage: Tests
   jobs:
@@ -146,6 +148,7 @@ stages:
               sudo python3 login.py | sudo tee -a /var/log/selenium/login.log
               mkdir -p log/selenium
               sudo touch /var/log/selenium/selenium.log
+            displayName: Run Selenium tests
   - job: JMeter
     displayName: Jmeter Tests
     pool:
@@ -189,7 +192,7 @@ stages:
     steps:
     - checkout: self
     - task: Npm@1
-      displayName: npm custom
+      displayName: Install Newman
       inputs:
         command: custom
         verbose: false
