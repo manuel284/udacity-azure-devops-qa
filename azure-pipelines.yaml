@@ -44,7 +44,7 @@ stages:
         backendAzureRmContainerName: 'tstate'
         backendAzureRmKey: 'terraform.tfstate'
     - task: TerraformTaskV1@0
-    displayName: Terraform apply
+      displayName: Terraform apply
       inputs:
         provider: 'azurerm'
         command: 'apply'
