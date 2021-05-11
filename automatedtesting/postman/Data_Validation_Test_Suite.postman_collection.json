@@ -16,10 +16,6 @@
 							"    pm.expect(pm.response.text()).to.include(\"success\");",
 							"});",
 							"",
-							"pm.test(\"Data Validation - POST - User created\", function () {",
-							"    pm.expect(pm.response.text()).to.include(\"Successfully! Record has been added.\");",
-							"});",
-							"",
 							"var json = pm.response.json();",
 							"pm.environment.set(\"id\", json.data.id);"
 						],
@@ -65,10 +61,6 @@
 						"exec": [
 							"pm.test(\"Data Validation - GET - Successful response\", function () {",
 							"    pm.expect(pm.response.text()).to.include(\"success\");",
-							"});",
-							"",
-							"pm.test(\"Data Validation - GET - User found\", function () {",
-							"    pm.expect(pm.response.text()).to.include(\"Successfully! Record has been fetched.\");",
 							"});",
 							"",
 							"var json = pm.response.json();",
@@ -122,10 +114,6 @@
 							"    pm.expect(pm.response.text()).to.include(\"success\");",
 							"});",
 							"",
-							"pm.test(\"Data Validation - PUT - User updated\", function () {",
-							"    pm.expect(pm.response.text()).to.include(\"Successfully! Record has been updated.\");",
-							"});",
-							"",
 							"var json = pm.response.json();"
 						],
 						"type": "text/javascript"
@@ -171,10 +159,6 @@
 						"exec": [
 							"pm.test(\"Data Validation - DELETE - Successful response\", function () {",
 							"    pm.expect(pm.response.text()).to.include(\"success\");",
-							"});",
-							"",
-							"pm.test(\"Data Validation - DELETE - User deleted\", function () {",
-							"    pm.expect(pm.response.text()).to.include(\"Successfully! Record has been deleted\");",
 							"});"
 						],
 						"type": "text/javascript"
