@@ -6,51 +6,51 @@ trigger:
 variables:
   python.version: '3.7.6'
 stages:
-# - stage: Deploy_Terraform
-#   jobs:
-#   - job: Build
-#     pool:
-#       name: Hosted Ubuntu 1604
-#     steps:
-#     # Needed for Terraform VM deployment
-#     - task: InstallSSHKey@0
-#       displayName: Install SSH Key
-#       inputs:
-#         knownHostsEntry: '$(KNOWN_HOSTS)'
-#         sshPublicKey: '$(PUBLIC_KEY)'
-#         sshKeySecureFile: 'id_rsa'
-#     - task: DownloadSecureFile@1
-#       name: tfvars
-#       displayName: Download terraform.tfvars
-#       inputs:
-#         secureFile: 'terraform.tfvars'
-#     - bash: |
-#         cp $(Agent.TempDirectory)/terraform.tfvars $(System.DefaultWorkingDirectory)/terraform/environments/test
-#       displayName: Copy terraform.tfvars to working directory
-#     - task: TerraformInstaller@0
-#       displayName: Install Terraform
-#       inputs:
-#         terraformVersion: '0.13.5'
-#     - task: TerraformTaskV1@0
-#       displayName: Terraform init
-#       inputs:
-#         provider: 'azurerm'
-#         command: 'init'
-#         workingDirectory: '$(System.DefaultWorkingDirectory)/terraform/environments/test'
-#         commandOptions: '-reconfigure'
-#         backendServiceArm: 'udacity-qa'
-#         backendAzureRmResourceGroupName: 'tstate'
-#         backendAzureRmStorageAccountName: 'tstate19882'
-#         backendAzureRmContainerName: 'tstate'
-#         backendAzureRmKey: 'terraform.tfstate'
-#     - task: TerraformTaskV1@0
-#       displayName: Terraform apply
-#       inputs:
-#         provider: 'azurerm'
-#         command: 'apply'
-#         workingDirectory: '$(System.DefaultWorkingDirectory)/terraform/environments/test'
-#         commandOptions: '-auto-approve'
-#         environmentServiceNameAzureRM: 'udacity-qa'
+- stage: Deploy_Terraform
+  jobs:
+  - job: Build
+    pool:
+      name: Hosted Ubuntu 1604
+    steps:
+    # Needed for Terraform VM deployment
+    - task: InstallSSHKey@0
+      displayName: Install SSH Key
+      inputs:
+        knownHostsEntry: '$(KNOWN_HOSTS)'
+        sshPublicKey: '$(PUBLIC_KEY)'
+        sshKeySecureFile: 'id_rsa'
+    - task: DownloadSecureFile@1
+      name: tfvars
+      displayName: Download terraform.tfvars
+      inputs:
+        secureFile: 'terraform.tfvars'
+    - bash: |
+        cp $(Agent.TempDirectory)/terraform.tfvars $(System.DefaultWorkingDirectory)/terraform/environments/test
+      displayName: Copy terraform.tfvars to working directory
+    - task: TerraformInstaller@0
+      displayName: Install Terraform
+      inputs:
+        terraformVersion: '0.13.5'
+    - task: TerraformTaskV1@0
+      displayName: Terraform init
+      inputs:
+        provider: 'azurerm'
+        command: 'init'
+        workingDirectory: '$(System.DefaultWorkingDirectory)/terraform/environments/test'
+        commandOptions: '-reconfigure'
+        backendServiceArm: 'udacity-qa'
+        backendAzureRmResourceGroupName: 'tstate'
+        backendAzureRmStorageAccountName: 'tstate19882'
+        backendAzureRmContainerName: 'tstate'
+        backendAzureRmKey: 'terraform.tfstate'
+    - task: TerraformTaskV1@0
+      displayName: Terraform apply
+      inputs:
+        provider: 'azurerm'
+        command: 'apply'
+        workingDirectory: '$(System.DefaultWorkingDirectory)/terraform/environments/test'
+        commandOptions: '-auto-approve'
+        environmentServiceNameAzureRM: 'udacity-qa'
 
 # - stage: Get_Artifacts
 #   jobs:
@@ -217,46 +217,46 @@ stages:
 #         mergeTestResults: true
 #         searchFolder: '$(build.artifactstagingdirectory)/log/postman'
 
- # uncomment after project completion
-- stage: Destroy_Terraform
-  jobs:
-  - job: Build
-    pool:
-      name: Hosted Ubuntu 1604
-    steps:
-    - task: InstallSSHKey@0
-      inputs:
-        knownHostsEntry: '$(KNOWN_HOSTS)'
-        sshPublicKey: '$(PUBLIC_KEY)'
-        sshKeySecureFile: 'id_rsa'
-    - task: DownloadSecureFile@1
-      name: tfvars
-      displayName: Download terraform.tfvars
-      inputs:
-        secureFile: 'terraform.tfvars'
-    - bash: |
-        cp $(Agent.TempDirectory)/terraform.tfvars $(System.DefaultWorkingDirectory)/terraform/environments/test
-      displayName: Copy terraform.tfvars to working directory
-    - task: TerraformInstaller@0
-      displayName: Install Terraform
-      inputs:
-        terraformVersion: '0.13.5'
-    - task: TerraformTaskV1@0
-      displayName: Terraform init
-      inputs:
-        provider: 'azurerm'
-        command: 'init'
-        workingDirectory: '$(System.DefaultWorkingDirectory)/terraform/environments/test'
-        backendServiceArm: 'udacity-qa'
-        backendAzureRmResourceGroupName: 'tstate'
-        backendAzureRmStorageAccountName: 'tstate19882'
-        backendAzureRmContainerName: 'tstate'
-        backendAzureRmKey: 'terraform.tfstate'
-    - task: TerraformTaskV1@0
-      displayName: Terraform destroy
-      inputs:
-        provider: 'azurerm'
-        command: 'destroy'
-        workingDirectory: '$(System.DefaultWorkingDirectory)/terraform/environments/test'
-        commandOptions: '-auto-approve'
-        environmentServiceNameAzureRM: 'udacity-qa'
+#  # uncomment after project completion
+# - stage: Destroy_Terraform
+#   jobs:
+#   - job: Build
+#     pool:
+#       name: Hosted Ubuntu 1604
+#     steps:
+#     - task: InstallSSHKey@0
+#       inputs:
+#         knownHostsEntry: '$(KNOWN_HOSTS)'
+#         sshPublicKey: '$(PUBLIC_KEY)'
+#         sshKeySecureFile: 'id_rsa'
+#     - task: DownloadSecureFile@1
+#       name: tfvars
+#       displayName: Download terraform.tfvars
+#       inputs:
+#         secureFile: 'terraform.tfvars'
+#     - bash: |
+#         cp $(Agent.TempDirectory)/terraform.tfvars $(System.DefaultWorkingDirectory)/terraform/environments/test
+#       displayName: Copy terraform.tfvars to working directory
+#     - task: TerraformInstaller@0
+#       displayName: Install Terraform
+#       inputs:
+#         terraformVersion: '0.13.5'
+#     - task: TerraformTaskV1@0
+#       displayName: Terraform init
+#       inputs:
+#         provider: 'azurerm'
+#         command: 'init'
+#         workingDirectory: '$(System.DefaultWorkingDirectory)/terraform/environments/test'
+#         backendServiceArm: 'udacity-qa'
+#         backendAzureRmResourceGroupName: 'tstate'
+#         backendAzureRmStorageAccountName: 'tstate19882'
+#         backendAzureRmContainerName: 'tstate'
+#         backendAzureRmKey: 'terraform.tfstate'
+#     - task: TerraformTaskV1@0
+#       displayName: Terraform destroy
+#       inputs:
+#         provider: 'azurerm'
+#         command: 'destroy'
+#         workingDirectory: '$(System.DefaultWorkingDirectory)/terraform/environments/test'
+#         commandOptions: '-auto-approve'
+#         environmentServiceNameAzureRM: 'udacity-qa'
