@@ -125,8 +125,8 @@ stages:
 #               sudo pip3 install selenium
 #             displayName: Install tools
 
-- stage: Tests
-  jobs:
+# - stage: Tests
+#   jobs:
   # - deployment: Selenium_Tests
   #   displayName: Selenium Tests
   #   environment:
@@ -181,78 +181,78 @@ stages:
   #     displayName: 'Upload Test Results'
   #     artifact: drop-jmeter-reports
 
-  - job: Postman
-    displayName: Postman Tests
-    pool:
-      vmImage: vs2017-win2016
-    steps:
-    - checkout: self
-    - task: Npm@1
-      displayName: Install Newman
-      inputs:
-        command: custom
-        verbose: false
-        customCommand: install -g newman
-    - task: CmdLine@2
-      displayName: Regression Tests
-      inputs:
-        script: newman run $(Build.SourcesDirectory)\automatedtesting\postman\Regression_Test_Suite.postman_collection.json -x -r junit --reporter-junit-export $(build.artifactstagingdirectory)\log\Postman\Regression_Test_Suite.xml
-    - task: CmdLine@2
-      displayName: Data Validation Tests
-      inputs:
-        script: newman run -e $(Build.SourcesDirectory)\automatedtesting\postman\QA.postman_environment.json $(Build.SourcesDirectory)\automatedtesting\postman\Data_Validation_Test_Suite.postman_collection.json -x -r junit --reporter-junit-export $(build.artifactstagingdirectory)\log\Postman\Data_Validation_Test_Suite.xml
-    - task: PublishPipelineArtifact@1
-      displayName: Publish Postman Logs
-      inputs:
-        targetPath: '$(build.artifactstagingdirectory)/log/postman'
-        artifactName: 'drop-postman-log'
-    - task: PublishTestResults@2
-      displayName: Publish Test Results
-      inputs:
-        testResultsFiles: '**\*.xml'
-        mergeTestResults: true
-        searchFolder: '$(build.artifactstagingdirectory)/log/postman'
+  # - job: Postman
+  #   displayName: Postman Tests
+  #   pool:
+  #     vmImage: vs2017-win2016
+  #   steps:
+  #   - checkout: self
+  #   - task: Npm@1
+  #     displayName: Install Newman
+  #     inputs:
+  #       command: custom
+  #       verbose: false
+  #       customCommand: install -g newman
+  #   - task: CmdLine@2
+  #     displayName: Regression Tests
+  #     inputs:
+  #       script: newman run $(Build.SourcesDirectory)\automatedtesting\postman\Regression_Test_Suite.postman_collection.json -x -r junit --reporter-junit-export $(build.artifactstagingdirectory)\log\Postman\Regression_Test_Suite.xml
+  #   - task: CmdLine@2
+  #     displayName: Data Validation Tests
+  #     inputs:
+  #       script: newman run -e $(Build.SourcesDirectory)\automatedtesting\postman\QA.postman_environment.json $(Build.SourcesDirectory)\automatedtesting\postman\Data_Validation_Test_Suite.postman_collection.json -x -r junit --reporter-junit-export $(build.artifactstagingdirectory)\log\Postman\Data_Validation_Test_Suite.xml
+  #   - task: PublishPipelineArtifact@1
+  #     displayName: Publish Postman Logs
+  #     inputs:
+  #       targetPath: '$(build.artifactstagingdirectory)/log/postman'
+  #       artifactName: 'drop-postman-log'
+  #   - task: PublishTestResults@2
+  #     displayName: Publish Test Results
+  #     inputs:
+  #       testResultsFiles: '**\*.xml'
+  #       mergeTestResults: true
+  #       searchFolder: '$(build.artifactstagingdirectory)/log/postman'
 
-#  # uncomment after project completion
-# - stage: Destroy_Terraform
-#   jobs:
-#   - job: Build
-#     pool:
-#       name: Hosted Ubuntu 1604
-#     steps:
-#     - task: InstallSSHKey@0
-#       inputs:
-#         knownHostsEntry: '$(KNOWN_HOSTS)'
-#         sshPublicKey: '$(PUBLIC_KEY)'
-#         sshKeySecureFile: 'id_rsa'
-#     - task: DownloadSecureFile@1
-#       name: tfvars
-#       displayName: Download terraform.tfvars
-#       inputs:
-#         secureFile: 'terraform.tfvars'
-#     - bash: |
-#         cp $(Agent.TempDirectory)/terraform.tfvars $(System.DefaultWorkingDirectory)/terraform/environments/test
-#       displayName: Copy terraform.tfvars to working directory
-#     - task: TerraformInstaller@0
-#       displayName: Install Terraform
-#       inputs:
-#         terraformVersion: '0.13.5'
-#     - task: TerraformTaskV1@0
-#       displayName: Terraform init
-#       inputs:
-#         provider: 'azurerm'
-#         command: 'init'
-#         workingDirectory: '$(System.DefaultWorkingDirectory)/terraform/environments/test'
-#         backendServiceArm: 'udacity-qa'
-#         backendAzureRmResourceGroupName: 'tstate'
-#         backendAzureRmStorageAccountName: 'tstate19882'
-#         backendAzureRmContainerName: 'tstate'
-#         backendAzureRmKey: 'terraform.tfstate'
-#     - task: TerraformTaskV1@0
-#       displayName: Terraform destroy
-#       inputs:
-#         provider: 'azurerm'
-#         command: 'destroy'
-#         workingDirectory: '$(System.DefaultWorkingDirectory)/terraform/environments/test'
-#         commandOptions: '-auto-approve'
-#         environmentServiceNameAzureRM: 'udacity-qa'
+ # uncomment after project completion
+- stage: Destroy_Terraform
+  jobs:
+  - job: Build
+    pool:
+      name: Hosted Ubuntu 1604
+    steps:
+    - task: InstallSSHKey@0
+      inputs:
+        knownHostsEntry: '$(KNOWN_HOSTS)'
+        sshPublicKey: '$(PUBLIC_KEY)'
+        sshKeySecureFile: 'id_rsa'
+    - task: DownloadSecureFile@1
+      name: tfvars
+      displayName: Download terraform.tfvars
+      inputs:
+        secureFile: 'terraform.tfvars'
+    - bash: |
+        cp $(Agent.TempDirectory)/terraform.tfvars $(System.DefaultWorkingDirectory)/terraform/environments/test
+      displayName: Copy terraform.tfvars to working directory
+    - task: TerraformInstaller@0
+      displayName: Install Terraform
+      inputs:
+        terraformVersion: '0.13.5'
+    - task: TerraformTaskV1@0
+      displayName: Terraform init
+      inputs:
+        provider: 'azurerm'
+        command: 'init'
+        workingDirectory: '$(System.DefaultWorkingDirectory)/terraform/environments/test'
+        backendServiceArm: 'udacity-qa'
+        backendAzureRmResourceGroupName: 'tstate'
+        backendAzureRmStorageAccountName: 'tstate19882'
+        backendAzureRmContainerName: 'tstate'
+        backendAzureRmKey: 'terraform.tfstate'
+    - task: TerraformTaskV1@0
+      displayName: Terraform destroy
+      inputs:
+        provider: 'azurerm'
+        command: 'destroy'
+        workingDirectory: '$(System.DefaultWorkingDirectory)/terraform/environments/test'
+        commandOptions: '-auto-approve'
+        environmentServiceNameAzureRM: 'udacity-qa'
